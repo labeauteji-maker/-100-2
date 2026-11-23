@@ -53,6 +53,55 @@
     margin: 0 auto;
   }
 
+  /* 상단 접기/펼치기 바 */
+  .collapse-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .collapse-bar.collapsed-only {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .mini-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-toggle-header {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border-hairline);
+    background: var(--bg-paper);
+    color: var(--accent-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .btn-toggle-header:hover {
+    background: var(--bg-sub);
+  }
+
+  .header-collapsible.is-collapsed {
+    display: none;
+  }
+
+
   .top-row {
     display: flex;
     flex-wrap: wrap;
@@ -551,6 +600,11 @@
 
 <header>
   <div class="header-inner">
+    <div class="collapse-bar" id="collapse-bar">
+      <span class="mini-title">2026 펀드투자권유자문인력 실전 모의고사</span>
+      <button type="button" class="btn-toggle-header" id="btn-toggle-header" onclick="toggleHeaderPanel()" aria-expanded="true">상단 메뉴 접기 ▲</button>
+    </div>
+    <div class="header-collapsible" id="header-collapsible">
     <div class="top-row">
       <div class="brand">
         <h1>2026 펀드투자권유자문인력 실전 모의고사</h1>
@@ -579,6 +633,7 @@
     <div class="progress-wrap">
       <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
       <div class="progress-label" id="progress-label">풀이 완료 0 / 100문항</div>
+    </div>
     </div>
   </div>
 </header>
@@ -745,7 +800,29 @@ function setFilter(filter) {
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.filter === filter);
   });
-  renderCard();
+  const STORAGE_HEADER_COLLAPSED = "fund100_header_collapsed_v1";
+
+function applyHeaderCollapseState(isCollapsed) {
+  const panel = document.getElementById("header-collapsible");
+  const bar = document.getElementById("collapse-bar");
+  const btn = document.getElementById("btn-toggle-header");
+  if (!panel || !bar || !btn) return;
+  panel.classList.toggle("is-collapsed", isCollapsed);
+  bar.classList.toggle("collapsed-only", isCollapsed);
+  btn.setAttribute("aria-expanded", String(!isCollapsed));
+  btn.textContent = isCollapsed ? "상단 메뉴 펼치기 ▼" : "상단 메뉴 접기 ▲";
+}
+
+function toggleHeaderPanel() {
+  const panel = document.getElementById("header-collapsible");
+  const nextState = !panel.classList.contains("is-collapsed");
+  localStorage.setItem(STORAGE_HEADER_COLLAPSED, String(nextState));
+  applyHeaderCollapseState(nextState);
+}
+
+applyHeaderCollapseState(localStorage.getItem(STORAGE_HEADER_COLLAPSED) === "true");
+
+renderCard();
 }
 
 function jumpToIndex(idx) {
